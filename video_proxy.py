@@ -3,7 +3,7 @@ import os
 import m3u8
 
 from queue import Queue
-from proxy_test_04 import Proxy, MAX_THREAD
+from proxy import Proxy, MAX_THREAD
 
 
 class Downloader:

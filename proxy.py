@@ -11,7 +11,7 @@ import queue
 from Crypto.Cipher import AES
 from typing import Dict
 from user_agents import parse
-from proxies import ips, user_agents
+from proxyList import ips, user_agents
 from urllib.parse import urlparse
 
 iv = binascii.unhexlify('43A6D967D5C17290D98322F5C8F6660B')
