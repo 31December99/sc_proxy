@@ -135,7 +135,7 @@ class Proxy(threading.Thread):
             except queue.Empty:
                 pass
             finally:
-                threading.Event().wait(0.1)
+                threading.Event().wait(1)
 
     def write_to_file(self, data: bytes, ts_filename: str):
         try:
