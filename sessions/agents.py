@@ -1,105 +1,7 @@
-ips = [
-    "104.207.62.55:3128",
-    "104.207.61.228:3128",
-    "104.207.63.231:3128",
-    "104.207.56.81:3128",
-    "104.207.60.210:3128",
-    "104.207.40.129:3128",
-    "104.207.62.155:3128",
-    "104.207.36.34:3128",
-    "104.207.53.155:3128",
-    "104.207.49.56:3128",
-    "104.207.48.230:3128",
-    "104.207.49.177:3128",
-    "104.207.53.163:3128",
-    "104.207.42.82:3128",
-    "104.207.44.33:3128",
-    "104.207.62.227:3128",
-    "104.207.53.79:3128",
-    "104.207.36.192:3128",
-    "104.207.52.156:3128",
-    "104.207.46.85:3128",
-    "104.167.24.125:3128",
-    "104.207.38.104:3128",
-    "104.207.59.16:3128",
-    "104.207.58.118:3128",
-    "104.207.60.145:3128",
-    "104.167.26.24:3128",
-    "104.167.29.52:3128",
-    "104.167.28.77:3128",
-    "104.207.52.105:3128",
-    "104.167.29.172:3128",
-    "104.167.26.152:3128",
-    "104.207.62.175:3128",
-    "104.207.34.203:3128",
-    "104.207.38.227:3128",
-    "104.207.45.56:3128",
-    "104.167.29.167:3128",
-    "104.207.50.37:3128",
-    "104.207.36.6:3128",
-    "104.167.30.18:3128",
-    "104.207.34.195:3128",
-    "104.167.30.151:3128",
-    "104.207.33.0:3128",
-    "104.207.53.81:3128",
-    "104.207.56.14:3128",
-    "104.167.27.129:3128",
-    "104.167.24.61:3128",
-    "104.207.37.196:3128",
-    "104.207.34.134:3128",
-    "104.207.51.154:3128",
-    "104.207.62.61:3128",
-    "104.207.36.152:3128",
-    "104.167.24.242:3128",
-    "104.207.59.102:3128",
-    "104.207.37.240:3128",
-    "104.207.48.6:3128",
-    "104.167.29.70:3128",
-    "104.207.50.59:3128",
-    "104.207.45.61:3128",
-    "104.207.51.53:3128",
-    "104.207.56.70:3128",
-    "104.207.41.186:3128",
-    "104.207.46.16:3128",
-    "104.207.40.74:3128",
-    "104.167.24.21:3128",
-    "104.207.61.10:3128",
-    "104.207.38.121:3128",
-    "104.207.62.154:3128",
-    "104.207.36.37:3128",
-    "104.207.39.0:3128",
-    "104.207.46.212:3128",
-    "104.207.54.19:3128",
-    "104.207.34.187:3128",
-    "104.207.60.29:3128",
-    "104.207.35.199:3128",
-    "104.207.55.44:3128",
-    "104.207.46.241:3128",
-    "104.207.54.64:3128",
-    "104.167.28.8:3128",
-    "104.207.43.0:3128",
-    "104.167.25.153:3128",
-    "104.207.58.73:3128",
-    "104.207.45.69:3128",
-    "104.207.61.36:3128",
-    "104.167.31.145:3128",
-    "104.207.50.103:3128",
-    "104.207.58.191:3128",
-    "104.167.30.90:3128",
-    "104.207.47.129:3128",
-    "104.207.45.157:3128",
-    "104.207.61.224:3128",
-    "104.207.42.234:3128",
-    "104.207.40.153:3128",
-    "104.207.60.136:3128",
-    "104.207.44.32:3128",
-    "104.167.24.229:3128",
-    "104.207.33.248:3128",
-    "104.207.40.222:3128",
-    "104.207.49.25:3128",
-    "104.207.57.161:3128",
-    "104.207.37.102:3128"
-]
+# -*- coding: utf-8 -*-
+import random
+from typing import Dict
+from user_agents import parse
 
 user_agents = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36",
@@ -295,8 +197,55 @@ user_agents = [
     "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:104.0) Gecko",
     "Mozilla/5.0 ArchLinux (X11; U; Linux x86_64; en-US) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.100",
     "Mozilla/5.0 (X11; U; Linux x86_64; fr-FR) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.514.0 Safari/534.7",
-
 ]
 
 
+class Agent:
 
+    @staticmethod
+    def headers(host='streamingcommunity.foo', refer='www.google.com', origin='', document='document', mode='navigate'):
+        agent = random.choice(user_agents)
+
+        # L'ordine degli headers è importante
+        headers = {
+            'User-Agent': agent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            "Upgrade-Insecure-Requests": "1",
+        }
+        headers.update({'host': host})
+        if origin: headers.update({'origin': origin})
+        headers.update({'refer': refer})
+        headers.update({'Sec-Fetch-Dest': 'document'})
+        headers.update({'Sec-Fetch-Mode': 'navigate'})
+
+        headers.update({
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+        })
+
+        # Experimental header
+        ua_to_ch = Agent.ua_to_ch(agent)
+        if ua_to_ch:
+            headers.update({
+                'sec-ch-ua-mobile': ua_to_ch['sec-ch-ua-mobile'],
+                'sec-ch-ua-platform': ua_to_ch['sec-ch-ua-platform'],
+                'sec-ch-ua': ua_to_ch['sec-ch-ua'],
+            })
+        return headers
+
+    @staticmethod
+    def ua_to_ch(ua_string: str) -> Dict[str, str]:
+        parsed = parse(ua_string)
+        if parsed.browser.family == "Chrome":
+            version = parsed.browser.version[0]
+            return {
+                "sec-ch-ua": f'"Not A;Brand";v="{version}", "Chromium";v="{version}", "Google Chrome";v="{version}"',
+                "sec-ch-ua-mobile": f"?{int(parsed.is_mobile)}",
+                "sec-ch-ua-platform": parsed.os.family,
+            }
+        else:
+            return {}
