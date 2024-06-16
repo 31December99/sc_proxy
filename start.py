@@ -42,6 +42,7 @@ async def start():
         media_name = media.data.video['name']
         # Non sempre il file_name è disponibile
         file_name = media_name if not media_file_name else media_file_name
+        file_name = file_name.replace("'", "_")
         print(f"[FILE NAME] {file_name}")
 
         # Tento il recupero della playlist 1080p todo: Forzato a 720p. Per 1080 serve token
@@ -96,11 +97,12 @@ async def start():
     del audio
     print(f'[DOWNLOAD COMPLETATO] {time.time() - start_timer} secs\n') if audio_path else None
 
-
     # Test
-    # audio_path = ''
-    # video_path = '/home/midnight/SC_Downloads/RogueOneAStarWarsStory/VIDEO'
-    # subtitles_path = '/home/midnight/SC_Downloads/RogueOneAStarWarsStory/SUB'
+    """
+    audio_path = ''
+    video_path = "/home/midnight/SC_Downloads/Winning Time: Ascesa Della Dinastia Dei Lakers S:1 E:2/VIDEO"
+    subtitles_path = ''
+    """
 
     # Se almeno i files della playlist video sono stati scaricati proseguo con il merge
     if playlist_video:
