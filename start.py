@@ -13,21 +13,13 @@ async def start():
     # Timer
     start_timer = time.time()
 
-    # Creo un nuovo Agent
-    headers = Agent.headers(host="streamingcommunity.foo",
-                            refer='www.google.com',
-                            document='navigate')
-
-    # Inizio una nuova sessione http con il nuovo Agent
-    async with sessions.MyHttp(headers=headers) as my_http:
-
-        # video ID
-        vixcloud_url = input("Digita il link: -> ")
-        url_parse = urlparse(vixcloud_url)
-        if url_parse.scheme and url_parse.netloc and url_parse.path:
-            scws_id = url_parse.path.split('/')[2]
-        if not scws_id.isdigit():
-            return
+    scws_id = None
+    vixcloud_url = input("Digita il link: -> ")
+    url_parse = urlparse(vixcloud_url)
+    if url_parse.scheme and url_parse.netloc and url_parse.path:
+        scws_id = url_parse.path.split('/')[2]
+    if not scws_id.isdigit():
+        return
 
     # Creo un nuovo Agent
     headers = Agent.headers(host="vixcloud.co",
