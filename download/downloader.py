@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import m3u8
-
 from queue import Queue
-from proxy import Proxy, MAX_THREAD
+from .proxy import Proxy, MAX_THREAD
 
 
 class Downloader:
+    """
+        Crea i threads per il download
+    """
 
     def __init__(self, playlist: m3u8, file_name: str, media: str, key=False):
         self.playlist: m3u8 = playlist
@@ -27,8 +29,8 @@ class Downloader:
         file_path = os.path.join(home_folder, "SC_Downloads", self.file_name, self.media)
 
         # Salva tutti i segments.uri in una coda safe-thread
-        for uri in self.playlist.segments.uri:
-            self.queue.put(uri)
+        for index, uri in enumerate(self.playlist.segments.uri):
+            self.queue.put((uri, index))
 
         # Creo i threads: ogni thread legge dalla coda e processa un url.
         # Terminato di processare l'url , leggerà nuovamente dalla coda è cos' via.

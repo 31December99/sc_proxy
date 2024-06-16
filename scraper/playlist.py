@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 import m3u8
-
 
 class BaseMedia:
     def __init__(self, group_id, name, uri):

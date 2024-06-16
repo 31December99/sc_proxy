@@ -3,47 +3,44 @@ import asyncio
 import time
 import m3u8
 import sessions
-from downloader import Downloader
-from scraper import page, build, utility
+from download import Downloader, Direct, merge, join
+from scraper import build, utility
 from sessions import Agent
+from urllib.parse import urlparse
 
 
 async def start():
-    # Ottengo l'ID del video dalla pagina Watch
+    # Timer
     start_timer = time.time()
-    playlist_audio: m3u8 = None
-    playlist_video: m3u8 = None
-    playlist_sub: m3u8 = None
 
+    # Creo un nuovo Agent
     headers = Agent.headers(host="streamingcommunity.foo",
                             refer='www.google.com',
                             document='navigate')
 
+    # Inizio una nuova sessione http con il nuovo Agent
     async with sessions.MyHttp(headers=headers) as my_http:
 
-        print("Digita il numero di watch esempio: https://streamingcommunity.foo/watch/4020 -> 4020")
-        watch = input("-> ")
-        if not watch.isdigit():
-            print("Devi digitare solo un numero..")
-            return
-        watch_url = f"https://streamingcommunity.foo/watch/{watch}"
-        response = await my_http.get(watch_url)
-        read = await response.read()
-        scws_id = page.scws(read)  # Ottiene il video ID
-        if scws_id == 0:
-            print(f"Non trovo il video che hai scelto -> {watch_url}")
+        # video ID
+        vixcloud_url = input("Digita il link: -> ")
+        url_parse = urlparse(vixcloud_url)
+        if url_parse.scheme and url_parse.netloc and url_parse.path:
+            scws_id = url_parse.path.split('/')[2]
+        if not scws_id.isdigit():
             return
 
-    # Ottengo la playlist master e le playlist per resolution disponibili
+    # Creo un nuovo Agent
     headers = Agent.headers(host="vixcloud.co",
                             refer='streamingcommunity.foo',
                             document='empty', mode='corse')
 
+    # Inizio una nuova sessione http con il nuovo Agent
     async with sessions.MyHttp(headers=headers) as my_http:
+
+        # Ottengo la playlist master e le playlist per resolution disponibili
         master_playlist_url = f"https://vixcloud.co/playlist/{scws_id}"  # Ricostruisci la playlist master
         response = await my_http.get(master_playlist_url)  # Ottiene la playlist master
         master_playlist_data = await response.text()
-
         # Ottengo filename e name da /video/
         video_url = f"https://vixcloud.co/video/{scws_id}"  # Ottiene informazioni sul video
         response = await my_http.get(video_url)
@@ -70,33 +67,66 @@ async def start():
         playlist_video = m3u8.loads(playlist_video_data)
         key = True if playlist_video.keys[0] else False
         key_message = 'Encrypted' if key else ''
-        print(f"[VIDEO DATA {key_message}] {playlist_video_url}")
+        # print(f"[VIDEO DATA] {key_message} {playlist_video_url}")
+        print(f"[VIDEO DATA] {key_message}")
 
+        # Ottengo la playlist audio
+        playlist_audio: m3u8 = None
         if media.data.audio:
             response = await my_http.get(media.data.audio['uri'])
             playlist_audio_data = await response.text()
             playlist_audio = m3u8.loads(playlist_audio_data)
-            print(f"[AUDIO DATA] Presente {media.data.audio['uri']}")
+            # print(f"[AUDIO DATA] Presente {media.data.audio['uri']}")
+            print(f"[AUDIO DATA] Presente")
 
+        # Ottengo la playlist subtitles
+        subtitles_path = ''
         if media.data.subtitle:
             response = await my_http.get(media.data.subtitle['uri'])
             playlist_sub_data = await response.text()
             playlist_sub = m3u8.loads(playlist_sub_data)
-            print(f"[SUB DATA]   Presente {playlist_sub.segments.uri}")
+            sub = Direct(file_name=file_name, media='SUB')
+            subtitles_path = sub.download_url(url=playlist_sub.segments.uri[0])  # todo verificare le lingue
+            # print(f"[SUB DATA]   Presente {playlist_sub.segments.uri}")
+            print(f"[SUB DATA]   Presente")
 
+    # Inizio i download del video
     video = Downloader(playlist=playlist_video, file_name=file_name, media='VIDEO', key=key)
-    video.start()
+    video_path = video.start()
     video.close()
+    del video
+    print(f'[DOWNLOAD COMPLETATO] {time.time() - start_timer} secs\n') if video_path else None
 
+    # Inizio i download dell' Audio
     audio = Downloader(playlist=playlist_audio, file_name=file_name, media='AUDIO', key=key)
-    audio.start()
+    audio_path = audio.start()
     audio.close()
+    del audio
+    print(f'[DOWNLOAD COMPLETATO] {time.time() - start_timer} secs\n') if audio_path else None
 
-    sub = Downloader(playlist=playlist_sub, file_name=file_name, media='SUB')
-    sub.start()
-    sub.close()
 
-    print(f'[COMPLETATO] {time.time() - start_timer} secs\n')
+    # Test
+    # audio_path = ''
+    # video_path = '/home/midnight/SC_Downloads/RogueOneAStarWarsStory/VIDEO'
+    # subtitles_path = '/home/midnight/SC_Downloads/RogueOneAStarWarsStory/SUB'
+
+    # Se almeno i files della playlist video sono stati scaricati proseguo con il merge
+    if playlist_video:
+        test_ts = join.Test()
+        audio_verify = True
+        video_verify = True
+
+        if playlist_audio:
+            audio_verify = test_ts.ts_sequence(ts_folder=audio_path, playlist=playlist_audio)
+        if playlist_video:
+            video_verify = test_ts.ts_sequence(ts_folder=video_path, playlist=playlist_video)
+
+        if audio_verify and video_verify:
+            m = merge.Merge(file_name=file_name, video_folder=video_path, audio_folder=audio_path,
+                            subtitles_folder=subtitles_path)
+            # todo: 'probe' per il momento non utilizzato
+            # m.verify_ts_files()
+            m.merge_ts_files()
 
 
 if __name__ == "__main__":

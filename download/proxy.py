@@ -20,7 +20,7 @@ aes_key = b'\xb2\x07\x82\xcb\xc3*xC\xe7i\x1dU\x95\x0c\x9aj'
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 MAX_PROXY = 100
-MAX_THREAD = 25
+MAX_THREAD = 10
 MAX_INIT_RND = MAX_PROXY - MAX_THREAD
 # Test header in locale 127.0.0.1 con test_headers.py
 TEST_HEADER = False
@@ -59,6 +59,10 @@ class Proxy(threading.Thread):
         self.next_proxy()
         self.next_headers()
 
+        if not ips:
+            print("Non hai configurato la lista proxy..")
+            return
+
         if not os.path.exists(file_path):
             os.makedirs(file_path)
 
@@ -83,10 +87,11 @@ class Proxy(threading.Thread):
     def run(self):
         """ threading.Thread"""
         while not self.queue.empty():
-            url = self.queue.get()
+            url, index = self.queue.get()
             try:
                 content, segment_filename = self.download_url(url)
-                self.write_queue.put((content, segment_filename))
+                if content:
+                    self.write_queue.put((content, segment_filename, index))
             finally:
                 self.queue.task_done()
 
@@ -98,22 +103,20 @@ class Proxy(threading.Thread):
         # aggiorno l'header con un nuovo host che corrisponde al net-loc dell'url scws
         self.headers['host'] = parsed_uri.netloc
         filename = parsed_uri.path.split('/')[-1]
-
-
         try:
             response = Proxy.session.get(url, headers=self.headers, proxies={'http': proxy_url, 'https': proxy_url},
                                          timeout=30, verify=False)
 
             if response.status_code == 200:
                 content = response.content
-                # print(f"[{response.status_code}] -> {url} {proxy_url}")
+                # print(f"[{threading.current_thread().name} {response.status_code}] -> {url} {proxy_url}")
                 return content, filename
             else:
                 print(f"[{response.status_code}] {proxy_url} -> {url}")
-                return None
+                return '', ''
         except Exception as e:
-            print(f"[EXCPT] {proxy_url} -> {url} {e}")
-            return None
+            print(f"[ * EXCPT * ] {proxy_url} -> {url}")
+            return '', ''
 
     def decrypt_cbc(self, data: bytes) -> bytes:
         cipher = AES.new(aes_key, AES.MODE_CBC, iv)
@@ -129,18 +132,18 @@ class Proxy(threading.Thread):
         while not self.stop_event.is_set():
             try:
                 while not self.write_queue.empty():
-                    segment_content, ts_filename = self.write_queue.get()
+                    segment_content, ts_filename, index = self.write_queue.get()
                     if segment_content:
-                        self.write_to_file(segment_content, ts_filename)
+                        self.write_to_file(segment_content, ts_filename, index)
             except queue.Empty:
                 pass
             finally:
                 threading.Event().wait(1)
 
-    def write_to_file(self, data: bytes, ts_filename: str):
+    def write_to_file(self, data: bytes, ts_filename: str, index: int):
         try:
-            print(self.folder, ts_filename)
-            with open(os.path.join(self.folder, ts_filename), 'wb') as file:
+            print(f"[DOWNLOAD] {self.folder} -> {ts_filename}")
+            with open(os.path.join(self.folder, f"{str(index).zfill(4)}_{ts_filename}"), 'wb') as file:
                 if data is not None:
                     _data = self.decrypt_cbc(data=data) if self.key else data
                     file.write(_data)
