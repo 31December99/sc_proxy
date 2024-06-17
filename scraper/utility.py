@@ -13,7 +13,6 @@ def best_resolution(media: list) -> str:
     resolution = 0
     resolution_url = ''
     for p in media:
-        print(p.uri)
         # Splitto query otteno l'intero del valore del parametro rendition
         query = (urlparse(p.uri)).query
         rendition = int((query.split('&')[1].replace("rendition=", '')).replace('p', ''))
