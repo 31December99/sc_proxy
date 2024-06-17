@@ -14,12 +14,17 @@ async def start():
     start_timer = time.time()
 
     scws_id = None
+    """
     vixcloud_url = input("Digita il link: -> ")
     url_parse = urlparse(vixcloud_url)
     if url_parse.scheme and url_parse.netloc and url_parse.path:
         scws_id = url_parse.path.split('/')[2]
     if not scws_id.isdigit():
         return
+    """
+
+    scws_id = 129347  # Anime
+    scws_id = 236227   # SC
 
     # Creo un nuovo Agent
     headers = Agent.headers(host="vixcloud.co",
@@ -44,24 +49,19 @@ async def start():
         file_name = media_name if not media_file_name else media_file_name
         file_name = file_name.replace("'", "_")
         print(f"[FILE NAME] {file_name}")
+        print(f"# MASTER # {master_playlist_url}") # todo
 
-        # Tento il recupero della playlist 1080p todo: Forzato a 720p. Per 1080 serve token
-        url_1080p = f"https://vixcloud.co/playlist/{scws_id}?type=video&rendition=720p"
-        response = await my_http.get(url_1080p)
-        _1080p_data = await response.text()
-        playlist_1080p = m3u8.loads(_1080p_data)
-        if playlist_1080p.segments.uri:
-            playlist_video_url = url_1080p
-        else:
-            # Altrimenti scelgo la migliore tra quelle disponibili nella playlist master
-            playlist_video_url = utility.best_resolution(media=media.data.video['stream_info'])
+        # scelgo la migliore risoluzione tra quelle disponibili nella playlist master
+        playlist_video_url = utility.best_resolution(media=media.data.video['stream_info'])
+        print(f"[BEST RESOLUTION] {playlist_video_url}")
+
         response = await my_http.get(playlist_video_url)
         playlist_video_data = await response.text()
         playlist_video = m3u8.loads(playlist_video_data)
         key = True if playlist_video.keys[0] else False
         key_message = 'Encrypted' if key else ''
-        # print(f"[VIDEO DATA] {key_message} {playlist_video_url}")
-        print(f"[VIDEO DATA] {key_message}")
+        print(f"[VIDEO DATA] {key_message} {playlist_video_url}")
+        # print(f"[VIDEO DATA] {key_message}")
 
         # Ottengo la playlist audio
         playlist_audio: m3u8 = None
@@ -69,8 +69,8 @@ async def start():
             response = await my_http.get(media.data.audio['uri'])
             playlist_audio_data = await response.text()
             playlist_audio = m3u8.loads(playlist_audio_data)
-            # print(f"[AUDIO DATA] Presente {media.data.audio['uri']}")
-            print(f"[AUDIO DATA] Presente")
+            print(f"[AUDIO DATA] Presente {media.data.audio['uri']}")
+            # print(f"[AUDIO DATA] Presente")
 
         # Ottengo la playlist subtitles
         subtitles_path = ''
@@ -80,9 +80,10 @@ async def start():
             playlist_sub = m3u8.loads(playlist_sub_data)
             sub = Direct(file_name=file_name, media='SUB')
             subtitles_path = sub.download_url(url=playlist_sub.segments.uri[0])  # todo verificare le lingue
-            # print(f"[SUB DATA]   Presente {playlist_sub.segments.uri}")
-            print(f"[SUB DATA]   Presente")
+            print(f"[SUB DATA]   Presente {playlist_sub.segments.uri}")
+            # print(f"[SUB DATA]   Presente")
 
+    return
     # Inizio i download del video
     video = Downloader(playlist=playlist_video, file_name=file_name, media='VIDEO', key=key)
     video_path = video.start()
