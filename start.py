@@ -13,18 +13,9 @@ async def start():
     # Timer
     start_timer = time.time()
 
-    scws_id = None
-    """
-    vixcloud_url = input("Digita il link: -> ")
-    url_parse = urlparse(vixcloud_url)
-    if url_parse.scheme and url_parse.netloc and url_parse.path:
-        scws_id = url_parse.path.split('/')[2]
+    scws_id = input("Digita il video ID: -> ")
     if not scws_id.isdigit():
         return
-    """
-
-    scws_id = 129347  # Anime
-    scws_id = 236227   # SC
 
     # Creo un nuovo Agent
     headers = Agent.headers(host="vixcloud.co",
@@ -61,7 +52,6 @@ async def start():
         key = True if playlist_video.keys[0] else False
         key_message = 'Encrypted' if key else ''
         print(f"[VIDEO DATA] {key_message} {playlist_video_url}")
-        # print(f"[VIDEO DATA] {key_message}")
 
         # Ottengo la playlist audio
         playlist_audio: m3u8 = None
@@ -70,7 +60,6 @@ async def start():
             playlist_audio_data = await response.text()
             playlist_audio = m3u8.loads(playlist_audio_data)
             print(f"[AUDIO DATA] Presente {media.data.audio['uri']}")
-            # print(f"[AUDIO DATA] Presente")
 
         # Ottengo la playlist subtitles
         subtitles_path = ''
@@ -81,9 +70,7 @@ async def start():
             sub = Direct(file_name=file_name, media='SUB')
             subtitles_path = sub.download_url(url=playlist_sub.segments.uri[0])  # todo verificare le lingue
             print(f"[SUB DATA]   Presente {playlist_sub.segments.uri}")
-            # print(f"[SUB DATA]   Presente")
 
-    return
     # Inizio i download del video
     video = Downloader(playlist=playlist_video, file_name=file_name, media='VIDEO', key=key)
     video_path = video.start()
