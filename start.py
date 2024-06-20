@@ -20,7 +20,7 @@ async def start():
     # Creo un nuovo Agent
     headers = Agent.headers(host="vixcloud.co",
                             refer='streamingcommunity.foo',
-                            document='empty', mode='corse')
+                            document='empty', mode='cors', secfetchSite='cross-site')
 
     # Inizio una nuova sessione http con il nuovo Agent
     async with sessions.MyHttp(headers=headers) as my_http:

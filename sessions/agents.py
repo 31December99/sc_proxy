@@ -203,7 +203,9 @@ user_agents = [
 class Agent:
 
     @staticmethod
-    def headers(host='streamingcommunity.foo', refer='www.google.com', origin='', document='document', mode='navigate'):
+    def headers(host='streamingcommunity.foo', refer='www.google.com', origin='', document='document', mode='navigate',
+                secfetchSite='same-origin'):
+
         agent = random.choice(user_agents)
 
         # L'ordine degli headers è importante
@@ -218,12 +220,11 @@ class Agent:
         headers.update({'host': host})
         if origin: headers.update({'origin': origin})
         headers.update({'refer': refer})
-        headers.update({'Sec-Fetch-Dest': 'document'})
-        headers.update({'Sec-Fetch-Mode': 'navigate'})
+        headers.update({'Sec-Fetch-Dest': document})
+        headers.update({'Sec-Fetch-Mode': mode})
 
         headers.update({
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-Site':  secfetchSite,
             'Sec-Fetch-User': '?1',
         })
 
