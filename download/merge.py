@@ -85,9 +85,15 @@ class Merge:
         final_output = os.path.join(self.output_folder, output_file)
         try:
             # Run the ffmpeg command using the file list
+            """
             ffmpeg.input('file_list.txt', format='concat', safe=0).output(final_output, c='copy',
                                                                           threads=8).global_args('-loglevel',
                                                                                                  'debug').run(quiet=True)
+            """
+
+            ffmpeg.input('file_list.txt', format='concat', safe=0).output(
+                final_output, c='copy', shortest=None, preset='ultrafast', threads=8).run(quiet=True)
+
             # capture_stdout=True, capture_stderr=True)
             print(f"[OK] {output_file}")
         except FileNotFoundError as e:
