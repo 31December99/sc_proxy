@@ -69,7 +69,7 @@ class Proxy(threading.Thread):
     def next_headers(self):
         # L'ordine degli headers è importante
         self.headers = Agent.headers(host="vixcloud.co",
-                                     refer='streamingcommunity.foo',
+                                     refer='streamingcommunity.boston',
                                      document='empty', mode='corse')
 
     def next_proxy(self):
@@ -115,7 +115,7 @@ class Proxy(threading.Thread):
                 print(f"[{response.status_code}] {proxy_url} -> {url}")
                 return '', ''
         except Exception as e:
-            print(f"[ * EXCPT * ] {proxy_url} -> {url}")
+            print(f"[ * EXCPT * {e}] {proxy_url} -> {url} ")
             return '', ''
 
     def decrypt_cbc(self, data: bytes) -> bytes:
