@@ -6,7 +6,7 @@ import sessions
 from download import Downloader, Direct, merge, join
 from scraper import build, utility
 from sessions import Agent
-from urllib.parse import urlparse
+
 
 
 async def start():
@@ -19,7 +19,7 @@ async def start():
 
     # Creo un nuovo Agent
     headers = Agent.headers(host="vixcloud.co",
-                            refer='streamingcommunity.foo',
+                            refer='streamingcommunity.boston',
                             document='empty', mode='cors', secfetchSite='cross-site')
 
     # Inizio una nuova sessione http con il nuovo Agent
@@ -40,7 +40,7 @@ async def start():
         file_name = media_name if not media_file_name else media_file_name
         file_name = file_name.replace("'", "_")
         print(f"[FILE NAME] {file_name}")
-        print(f"# MASTER # {master_playlist_url}") # todo
+        print(f"# MASTER # {master_playlist_url}")  # todo
 
         # scelgo la migliore risoluzione tra quelle disponibili nella playlist master
         playlist_video_url = utility.best_resolution(media=media.data.video['stream_info'])
@@ -88,7 +88,7 @@ async def start():
     # Test
     """
     audio_path = ''
-    video_path = "/home/midnight/SC_Downloads/Winning Time: Ascesa Della Dinastia Dei Lakers S:1 E:2/VIDEO"
+    video_path = "/home/midnight/SC_Downloads/Rick and Morty S:3 E:2/VIDEO"
     subtitles_path = ''
     """
 
